@@ -22,19 +22,22 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 publish(Msg) ->
-    gen_server:call({local, ?MODULE}, {publish, Msg}).
+    gen_server:call(?MODULE, {publish, Msg}).
+
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
 %% ------------------------------------------------------------------
 
 init([]) ->
-    Socket = zmq:socket(pub),
-    zmq:bind(Socket, app_helper:get_env(riak_zmq, zmq_uri, "tcp://127.0.0.1:5500")),
+    {ok, Context} = erlzmq:context(),
+    {ok, Socket} = erlzmq:socket(Context, pub),
+    erlzmq:bind(Socket, app_helper:get_env(riak_zmq, zmq_uri, "tcp://127.0.0.1:5500")),
     {ok, Socket}.
 
 handle_call({publish, Msg}, _From, Socket) ->
-    zmq:send(Socket, Msg),
+    send_multipart(Socket, Msg),
     {reply, ok, Socket};
+
 handle_call(_Request, _From, State) ->
     {noreply, ok, State}.
 
@@ -54,3 +57,9 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
+send_multipart(Socket, [Next|Rest]) when Rest == [] -> 
+    erlzmq:send(Socket, Next);
+
+send_multipart(Socket, [Next|Rest]) ->
+    erlzmq:send(Socket, Next, [sndmore]),
+    send_multipart(Socket, Rest).

@@ -7,8 +7,7 @@
                   kernel,
                   stdlib,
                   riak_core,
-                  riak_kv,
-                  zmq                  
+                  riak_kv
                  ]},
   {mod, { riak_zmq_app, []}},
   {env, [

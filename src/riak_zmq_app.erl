@@ -11,7 +11,6 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    ensure_started(zmq),
     riak_zmq_sup:start_link().
 
 stop(_State) ->
