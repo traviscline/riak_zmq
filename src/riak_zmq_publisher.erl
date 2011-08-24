@@ -57,7 +57,7 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
-send_multipart(Socket, [Next|Rest]) when Rest == [] -> 
+send_multipart(Socket, [Next]) ->
     erlzmq:send(Socket, Next);
 
 send_multipart(Socket, [Next|Rest]) ->
